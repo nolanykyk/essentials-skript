@@ -1,0 +1,346 @@
+# MADE BY NOLAN (discord.gg/mcdevs)
+
+# READ ME!!
+
+# Dependencies
+
+# Skript
+# LuckPerms
+
+# PLACEHOLDERS
+
+# %balance_formatted% (formatted balance)
+# %balance_nonformatted% (nonformatted balance)
+
+options: 
+
+	# CONFIGURE
+    
+	startingmoney: 100
+
+	# COLORS
+
+	color1: &a # GREEN
+	color2: &c # RED
+	color3: &e # YELLOW
+	color4: &7 # GRAY
+	color5: &f # WHITE
+
+    # MAIN
+
+	essentialsprefix: <##57E7FB>&lESSENTIALS &8•
+
+    # ERRORS
+    
+	tpausage: &f/tpa (player), &athis will allow you to teleport to another user
+	payusage: &cDo /pay <user> to pay another user
+	tpahereusage: &f/tpahere (player), &aSends a teleport here request to a player
+	cantpayyourself: &cYou can't pay yourself, try /pay <player> <amount>!
+	cantpaynobody: &cYou can't pay nobody, try /pay player amount!
+	cantecogivenobody: &cYou can't eco give no one, try /eco give <player> <amount> 
+	cantpay0: &cYou can't pay $0!
+	cantpaylessthan0: &cYou can't pay in negative amounts
+	canttakelessthan0: &cYou can't take in negative amounts
+	insufficientfunds: &cInsufficienct Funds!
+	permission: &cYou do not have the required permission to use this command
+	movementdetected: &cCanceled: Movement Detected
+	cantecotakenobody: &cYou can't take nobodys money, try /ecotake <player> <amount>
+	cantecoresetnobody: &cYou can't reset nobodys money, try /ecoreset <player>
+	cantbalnobody: &cYou can't check the balance of no one, try /bal <player>
+	expiredtparequeste: &cYour teleport request for &f%arg-1% &chas expired
+	expiredtparequestp: &cYour teleport request from &f%player% &chas expired
+	cantdenyyourself: &cYou can't deny yourself
+	notparequestsfound: &cNo teleportation request found, please use /tpdeny <player>
+	cantdenynobody: &cYou can't deny no one, please use /tpdeny <player>
+	canttpatoself: &cYou cannot teleport to yourself!
+	cantacceptnottprequest: &cYou can't accept no ones teleport request
+    
+    # COOLDOWNS
+    
+	cooldown: &cThis command is on cooldown for %remaining time%
+    
+	paycooldown: 3 seconds
+	tpacooldown: 30 seconds
+	spawncooldown: 30 seconds
+    
+    # MESSAGES
+    
+	announcementtitle: &c&lANNOUNCEMENT
+	ecogivesuccess: &aYou sent $%arg-2% to %arg-1%
+	ecorecievesuccess: &aYou recieved $%arg-2% from %player%
+	ecotakesuccess: &cYou took $%arg-2% from %arg-1%
+	ecoresetsuccess: &cYou reset %arg-1%'s balance
+	paymentsent: &aYou sent $%arg-2% to %arg-1%
+	paymentrecieved: &aYou recieved $%arg-2% from %player%
+	bal: &a%arg-1% current balance is: $%balanceformatted({balance::%arg-1%})%
+	recievedtparequest: &f%player% &ahas sent you a teleport request! Use &f/tpaccept &ato accept their request
+	senttparequest: &aYou sent a teleport request to &f%arg-1%
+	deniedtparequest: &cYou''ve denied &f%arg-1%''s &cteleport request
+	tparequestaccepted: &aYou accepted &f%{_p}%'s &ateleport request!
+	teleporting: &aTeleporting in %6-loop-value% seconds, do not move!
+	teleported: &aTeleported
+	teleportingtoplayer: &aTeleporting to %player%...
+	playerwantstoteleport: &f%player% &awants you to teleport to them! Use &f/tpaccept &ato teleport
+	senttpahererequest: &aYou sent a teleport here request to &f%arg-1%
+	setspawn: &aSuccessfully set the spawn location!
+	balanceself: &a$%balanceformatted({balance::%player%})%
+	balanceselfundefined: &a$0
+	balanceothersundefined: &a$0
+
+on placeholderapi placeholder request for the prefix "balance":
+	if the identifier is "formatted":
+		if {balance::%player%} is set:
+			set the result to "&a%balanceformatted({balance::%player%})%"
+		else if {balance::%player%} is not set:
+			set the result to "&a0"
+	if the identifier is "nonformatted":
+		if {balance::%player%} is set:
+			set the result to "&a%{balance::%player%}%"
+		else if {balance::%player%} is not set:
+			set the result to "&a0"
+
+function balanceformatted(n: number) :: text: # THIS FUNCTION WAS MADE BY AWEL (this was my first Skript, so I needed a bit of help)
+	set {_data} to "QT,18|Q,15|T,12|B,9|M,6|k,3"
+	loop split {_data} at "|":
+		set {_s::*} to split loop-value at ","
+		{_n} >= 10 ^ {_s::2} parsed as number
+		return "%{_n} / 10 ^ {_s::2} parsed as number%%{_s::1}%"
+	return "%{_n}%"
+
+on join:	
+	add 0 to {balance::%player%} 
+
+on first join:
+	set {balance::%player%} to {startingmoney}
+ 
+command eco-give [<player>] [<int>]:
+	permission: ecogive.use
+	permission message: {@permission}
+	trigger:
+		if arg-1 is not set:
+			send action bar "{@essentialsprefix} {@cantecogivenobody}" to executor
+			send "{@essentialsprefix} {@cantecogivenobody}" to executor
+		if arg-2 is less than 0:
+			send action bar "{@essentialsprefix} {@cantpaylessthan0}" to executor
+			send "{@essentialsprefix} {@cantpaylessthan0}"
+		else if arg-2 is set:
+			send action bar "{@essentialsprefix} {@ecogivesuccess}" to executor
+			send "{@essentialsprefix} {@ecogivesuccess}" to executor
+			send action bar "{@essentialsprefix} {@ecorecievesuccess}" to arg-1
+			send "{@essentialsprefix} {@ecorecievesuccess}" to arg-1
+			add arg-2 to {balance::%arg-1%}
+
+command eco-take [<player>] [<int>]:
+	permission: ecotake.use
+	permission message: {@permission}
+	trigger:
+		if arg-1 is not set:
+			send action bar "{@essentialsprefix} {@cantecotakenobody}" to executor
+			send "{@essentialsprefix} {@cantecotakenobody}" to executor
+			stop
+		if arg-2 is less than 0:
+			send action bar "{@essentialsprefix} {@canttakelessthan0}" to executor
+			send "{@essentialsprefix} {@canttakelessthan0}"
+		else if arg-2 is set:
+			send action bar "{@essentialsprefix} {@ecotakesuccess}" to executor
+			send "{@essentialsprefix} {@ecotakesuccess}" to executor
+			remove arg-2 from {balance::%player%}
+
+command eco-reset [<player>]:
+	permission: ecoreset.use
+	permission message: {@permission}
+	trigger:
+		if arg-1 is not set:
+			send action bar "{@essentialsprefix} {@cantecoresetnobody}" to executor
+			send "{@essentialsprefix} {@cantecoresetnobody}" to executor
+		else if arg-1 is set:
+			send action bar "{@essentialsprefix} {@ecoresetsuccess}" to executor
+			send "{@essentialsprefix} {@ecoresetsuccess}" to executor
+			set {balance::%arg-1%} to {startingmoney}
+
+command pay [<player>] [<number>]:
+	cooldown: {@paycooldown}
+	usage: {@payusage}
+	cooldown message: {@cooldown}
+	trigger:
+		if arg-1 is executor:
+			send action bar "{@essentialsprefix} {@cantpayyourself}" to executor
+			send "{@essentialsprefix} {@cantpayyourself}" to executor
+			stop
+		else if arg-1 is not set:
+			send action bar "{@essentialsprefix} {@cantpaynobody}" to executor
+			send "{@essentialsprefix} {@cantpaynobody}" to executor
+		else if arg-2 is 0:
+			send action bar "{@essentialsprefix} {@cantpay0}" to executor
+			send "{@essentialsprefix} {@cantpay0}"
+		else if arg-2 is less than 0:
+			send action bar "{@essentialsprefix} {@cantpaylessthan0}" to executor
+			send "{@essentialsprefix} {@cantpaylessthan0}"
+		else if arg-2 is set:
+			if {balance::%executor%} is not more than arg-2:
+				send action bar "{@essentialsprefix} {@insufficientfunds}" to executor
+				send "{@essentialsprefix} {@insufficientfunds}" to executor
+			else if arg-2 is set:
+				if {balance::%executor%} is more than arg-2:
+					send action bar "{@essentialsprefix} {@paymentsent}" to executor
+					send "{@essentialsprefix} {@paymentsent}" to executor
+					send action bar "{@essentialsprefix} {@paymentrecieved}" to arg-1
+					send "{@essentialsprefix} {@paymentrecieved}" to arg-1
+					remove arg-2 from {balance::%executor%}
+					add arg-2 to {balance::%arg-1%}
+		else if arg-2 is not set:
+			send action bar "{@essentialsprefix} {@cantpay0}" to executor
+			send "{@essentialsprefix} {@cantpay0}" to executor
+                    
+command bal [<player>]:
+	trigger:
+		if arg-1 is not set:
+			if {balance::%player%} is set:
+				send action bar "{@essentialsprefix} {@balanceself}" to executor
+				send "{@essentialsprefix} {@balanceself}" to executor
+			else if {balance::%player%} is not set:
+				send action bar "{@essentialsprefix} {@balanceselfundefined}" to executor
+				send "{@essentialsprefix} {@balanceselfundefined}" to executor
+		else if arg-1 is set:
+			if {balance::%arg-1%} is set:
+				send action bar "{@essentialsprefix} {@bal}" to executor
+				send "{@essentialsprefix} {@bal}" to executor
+			else if {balance::%arg-1%} is not set:
+				send action bar "{@essentialsprefix} {@balanceothersundefined}" to executor
+				send "{@essentialsprefix} {@balanceothersundefined}" to executor
+
+command tpa <player>:
+	cooldown: {@tpacooldown}
+	usage: {@tpausage}
+	cooldown message: {@cooldown}
+	trigger:
+		if arg-1 is not player:
+			send "{@essentialsprefix} {@recievedtparequest}" to arg-1
+			send "{@essentialsprefix} {@senttparequest}" to player
+			set {request::player::%arg-1%} to player
+			wait 60 seconds
+			if {request::player::%arg-1%} is set:
+				clear {request::player::%arg-1%}
+				send "{@expiredtparequeste}" to player
+				send "{@expiredtparequestp}" to arg-1
+		else:
+			send "{@essentialsprefix} {@canttpatoself}" to player
+        
+command tpdeny [<player>]:
+	trigger:
+		if arg-1 is executor:
+			send action bar "{@essentialsprefix} {@cantdenyyourself}" to executor
+			stop
+		else if {request::player::%player%} is not set:
+			send action bar "{@essentialsprefix} {@notparequestsfound}" to executor
+			stop
+		if arg-1 is not set:
+			send action bar "{@essentialsprefix} {@cantdenynobody}" to executor
+			stop
+		else:
+			set {_p} to {request::player::%player%}
+			send "{@essentialsprefix} {@deniedtparequest}" to player
+			clear {request::player::%player%}
+        
+
+command tpaccept [<player>]:
+	trigger:
+		set {_p} to {request::player::%player%}
+		set {_block} to location of block at {_p}
+		send "{@tparequestaccepted}" to player
+		if {request::player::%player%} is set:
+			loop 5 times:
+				play sound "entity.enderman.teleport" to {_p}
+				send "{@teleporting}" to {_p}
+				wait 1 second
+				if {_block} is not location of block at {_p}:
+					send action bar "{@movementdetected}" to {_p}
+					stop
+					wait 1 second
+			play sound "entity.dragon_fireball.explode" to {_p}
+			teleport {_p} to location of player
+			clear {request::player::%player's uuid%}
+			send action bar "{@teleported}" to {_p}
+
+command tpall:
+	permission: tpall.use
+	permission message: {@permission}
+	trigger:
+		teleport all players to player
+		play sound "entity.experience_orb.pickup" with volume 0.1 to player
+
+command spawn:
+    cooldown: {@spawncooldown}
+    cooldown message: {@cooldown}
+    trigger:
+        teleporttimer(player, location)
+
+command setspawn:
+    permission: op
+    permission message: {@permission}
+    trigger:
+        set {spawn::location} to sender's position
+        send "{@essentialsprefix} {@setspawn}"
+
+function teleporttimer(p: player, l: location):
+	set {teleporttimer::%{_p}%} to 5
+	set {_l} to location of block at {_p}
+	loop 5 times:
+		play sound "entity.enderman.teleport" at volume 1 to {_p}
+		send "{@teleporting}" to {_p}
+		remove 1 from {teleporttimer::%{_p}%}
+		wait 1 second
+		if {_l} is not location of block at {_p}:
+			send "{@movementdetected}" to {_p}
+			stop
+			clear {teleporttimer::%{_p}%}
+	if {teleporttimer::%{_p}%} is 0:
+		clear {teleporttimer::%{_p}%}
+		teleport {_p} to {_l}
+		send action bar "{@teleported}" to {_p}
+		play sound "entity.dragon_fireball.explode" to {_p}
+
+on first join:
+    teleport player to {spawn::location}
+    
+command /announce <string>:
+	aliases: broadcast, b
+	permission: announce.use
+	permission message: {@permission}
+	trigger:
+		broadcast "" 
+		broadcast "{@announcementtitle}"
+		broadcast ""
+		broadcast "&7&l|&f %colored arg 1%"
+		broadcast ""
+		play sound "block.note_block.bit" at volume 1 to all players
+
+command /ping [<player>]:
+	trigger:
+		if arg-1 is not set:
+			send "&fYou have {@color1}%player's ping% ping"
+		else if arg-1 is set:
+			send "&f%arg-1% has {@color1}%arg-1's ping% ping"
+
+command /rtp:
+	trigger:
+		set {_rtpgui} to a new chest inventory with 3 row with name "&8Random Teleport"
+		set slot 11 of {_rtpgui} to grass named "{@color1}&lOVERWORLD" with lore "", "&fClick to teleport to a random", "&flocation in the overworld!", "" and "{@color1}→ Click To RTP"
+		set slot 13 of {_rtpgui} to end stone named "{@color3}&lEND" with lore "", "&fClick to teleport to a random", "&flocation in the end!", "" and "{@color1}→ Click To RTP"
+		set slot 15 of {_rtpgui} to netherrack named "{@color2}&lNETHER" with lore "", "&fClick to teleport to a random", "&flocation in the nether!", "" and "{@color1}→ Click To RTP"
+		open {_rtpgui} to player
+
+on inventory click:
+	if name of event-inventory is "&8Random Teleport":
+		if clicked slot is 11:
+			close player's inventory
+			make player execute command "/betterrtp:rtp world world"
+			cancel event
+		if clicked slot is 13:
+			close player's inventory
+			make player execute command "/betterrtp:rtp world world_the_end"
+			cancel event
+		if clicked slot is 15:
+			close player's inventory
+			make player execute command "/betterrtp:rtp world world_nether"
+			cancel event
